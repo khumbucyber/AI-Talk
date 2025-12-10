@@ -1,0 +1,538 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIアプリの「裏側」を知ろう - AIトーク会</title>
+  <!-- ファイル名: aiappbackend.html -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; font-family: 'Segoe UI', 'Hiragino Kaku Gothic ProN', sans-serif; }
+    .slide { display: none; min-height: 100vh; }
+    .slide.active { display: flex; flex-direction: column; }
+    pre { white-space: pre-wrap; word-wrap: break-word; }
+    code { font-family: 'Fira Code', 'Consolas', monospace; }
+  </style>
+</head>
+<body class="bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+
+<!-- Slide 1: Title -->
+<div class="slide" data-slide="0">
+  <div class="flex-1 flex flex-col items-center justify-center text-center p-8">
+    <div class="text-7xl mb-6">🤖</div>
+    <h1 class="text-5xl font-bold mb-4 text-blue-100">AIアプリの「裏側」を知ろう</h1>
+    <p class="text-2xl text-gray-300 mb-8">〜 LLMは学習しない、でも賢く見える理由 〜</p>
+    <div class="text-gray-400 mt-8 text-xl">AIトーク会</div>
+  </div>
+</div>
+
+<!-- Slide 2: Agenda -->
+<div class="slide" data-slide="1">
+  <div class="flex-1 p-12">
+    <h2 class="text-4xl font-bold mb-10 text-blue-100">今日話すこと</h2>
+    <div class="space-y-6 text-xl max-w-4xl">
+      <div class="flex items-start gap-4 bg-slate-800/50 p-5 rounded-lg">
+        <span class="text-3xl">1️⃣</span>
+        <div>
+          <div class="font-semibold text-blue-200 text-2xl">「AI」って何を指してる？</div>
+          <div class="text-gray-400 text-lg mt-1">AIアプリ vs LLM の違いを整理</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-4 bg-slate-800/50 p-5 rounded-lg">
+        <span class="text-3xl">2️⃣</span>
+        <div>
+          <div class="font-semibold text-blue-200 text-2xl">LLM APIはステートレス【デモあり】</div>
+          <div class="text-gray-400 text-lg mt-1">毎回記憶喪失するLLMの実態</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-4 bg-slate-800/50 p-5 rounded-lg">
+        <span class="text-3xl">3️⃣</span>
+        <div>
+          <div class="font-semibold text-blue-200 text-2xl">なぜ「覚えている」ように見えるのか</div>
+          <div class="text-gray-400 text-lg mt-1">アプリ側の工夫と外部メモリの仕組み</div>
+        </div>
+      </div>
+      <div class="flex items-start gap-4 bg-slate-800/50 p-5 rounded-lg">
+        <span class="text-3xl">4️⃣</span>
+        <div>
+          <div class="font-semibold text-blue-200 text-2xl">賢く使うために</div>
+          <div class="text-gray-400 text-lg mt-1">仕組みを理解した上での活用法</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 3: AI Layers -->
+<div class="slide" data-slide="2">
+  <div class="flex-1 p-10">
+    <h2 class="text-4xl font-bold mb-8 text-blue-100">「AI」が指すもの - 3つのレイヤー</h2>
+    <div class="flex flex-col gap-5 max-w-5xl">
+      <div class="bg-gradient-to-r from-cyan-900/60 to-cyan-800/30 border-l-4 border-cyan-400 p-5 rounded-r-lg">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-cyan-400 text-slate-900 px-4 py-1 rounded-full text-sm font-bold">Layer 1</div>
+          <h3 class="text-2xl font-bold text-cyan-100">AIアプリケーション</h3>
+          <span class="text-gray-400">← 一般の人が言う「AI」</span>
+        </div>
+        <p class="text-gray-300 mb-3 text-lg">ユーザーが直接触れる「製品」全体</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-cyan-900/50 px-4 py-2 rounded-full">ChatGPT</span>
+          <span class="bg-cyan-900/50 px-4 py-2 rounded-full">GitHub Copilot</span>
+          <span class="bg-cyan-900/50 px-4 py-2 rounded-full">Claude</span>
+          <span class="bg-cyan-900/50 px-4 py-2 rounded-full">UI・課金・履歴管理など</span>
+        </div>
+      </div>
+      <div class="bg-gradient-to-r from-pink-900/60 to-pink-800/30 border-l-4 border-pink-400 p-5 rounded-r-lg">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-pink-400 text-slate-900 px-4 py-1 rounded-full text-sm font-bold">Layer 2</div>
+          <h3 class="text-2xl font-bold text-pink-100">AIシステム / エージェント</h3>
+          <span class="text-gray-400">← エンジニアが言う「AI」</span>
+        </div>
+        <p class="text-gray-300 mb-3 text-lg">アプリ内部で動く「AIの頭脳ロジック」</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-pink-900/50 px-4 py-2 rounded-full">外部メモリ管理</span>
+          <span class="bg-pink-900/50 px-4 py-2 rounded-full">RAG検索</span>
+          <span class="bg-pink-900/50 px-4 py-2 rounded-full">ツール実行</span>
+          <span class="bg-pink-900/50 px-4 py-2 rounded-full">プロンプト構築</span>
+        </div>
+      </div>
+      <div class="bg-gradient-to-r from-green-900/60 to-green-800/30 border-l-4 border-green-400 p-5 rounded-r-lg">
+        <div class="flex items-center gap-3 mb-3">
+          <div class="bg-green-400 text-slate-900 px-4 py-1 rounded-full text-sm font-bold">Layer 3</div>
+          <h3 class="text-2xl font-bold text-green-100">LLM（モデル本体）</h3>
+          <span class="text-gray-400">← 研究者が言う「AI」</span>
+        </div>
+        <p class="text-gray-300 mb-3 text-lg">言語理解・生成を担う「モデル」そのもの</p>
+        <div class="flex flex-wrap gap-2">
+          <span class="bg-green-900/50 px-4 py-2 rounded-full">GPT-4</span>
+          <span class="bg-green-900/50 px-4 py-2 rounded-full">Claude</span>
+          <span class="bg-green-900/50 px-4 py-2 rounded-full">Llama</span>
+          <span class="bg-green-900/50 px-4 py-2 rounded-full">ステートレス</span>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 bg-slate-800/50 p-4 rounded-lg text-center text-xl">
+      <span class="text-yellow-300">💡</span> 普段みんなが使っているのは <span class="text-cyan-300 font-bold">Layer 1</span> のAIアプリ
+    </div>
+  </div>
+</div>
+
+<!-- Slide 4: Car Analogy -->
+<div class="slide" data-slide="3">
+  <div class="flex-1 p-10">
+    <h2 class="text-4xl font-bold mb-10 text-blue-100">例えると「車」のようなもの</h2>
+    <div class="grid grid-cols-2 gap-8 max-w-5xl">
+      <div class="space-y-5">
+        <div class="bg-cyan-900/40 p-6 rounded-xl border border-cyan-700/50">
+          <div class="text-5xl mb-3">🚗</div>
+          <h3 class="text-2xl font-bold text-cyan-200 mb-2">AIアプリケーション</h3>
+          <p class="text-gray-300 text-xl">= 車そのもの</p>
+          <p class="text-gray-400 mt-2">内装、ボディ、ナビ、エアコン…<br>ユーザーが乗る「製品」</p>
+        </div>
+        <div class="bg-pink-900/40 p-6 rounded-xl border border-pink-700/50">
+          <div class="text-5xl mb-3">⚙️</div>
+          <h3 class="text-2xl font-bold text-pink-200 mb-2">AIシステム</h3>
+          <p class="text-gray-300 text-xl">= エンジン＋駆動系＋制御</p>
+          <p class="text-gray-400 mt-2">車を動かす「動力システム」</p>
+        </div>
+        <div class="bg-green-900/40 p-6 rounded-xl border border-green-700/50">
+          <div class="text-5xl mb-3">🔥</div>
+          <h3 class="text-2xl font-bold text-green-200 mb-2">LLM</h3>
+          <p class="text-gray-300 text-xl">= エンジン単体</p>
+          <p class="text-gray-400 mt-2">燃料を燃やして動力を生む<br>「コア部品」</p>
+        </div>
+      </div>
+      <div class="flex items-center justify-center">
+        <div class="bg-slate-800/70 p-8 rounded-xl">
+          <p class="text-2xl text-center leading-relaxed">
+            <span class="text-yellow-300">🔑 ポイント</span><br><br>
+            エンジン（LLM）だけでは<br>
+            車は走れない<br><br>
+            <span class="text-cyan-300">車体やナビ</span>があって初めて<br>
+            <span class="text-green-300">便利な移動手段</span>になる
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 5: Stateless -->
+<div class="slide" data-slide="4">
+  <div class="flex-1 p-10">
+    <h2 class="text-4xl font-bold mb-8 text-blue-100">LLM APIは「ステートレス」</h2>
+    <div class="bg-red-900/30 border border-red-500/50 p-8 rounded-xl mb-8 max-w-3xl mx-auto">
+      <div class="text-center">
+        <div class="text-6xl mb-4">🐟</div>
+        <p class="text-3xl font-bold text-red-200">LLMは「毎回記憶喪失の天才」</p>
+        <p class="text-gray-300 mt-3 text-xl">APIを叩くたびに、前回の会話は完全に忘れている</p>
+      </div>
+    </div>
+    <div class="grid grid-cols-2 gap-8 max-w-4xl mx-auto">
+      <div class="bg-slate-800/50 p-6 rounded-xl">
+        <h3 class="text-xl font-bold text-blue-200 mb-4">ステートレスとは</h3>
+        <ul class="space-y-3 text-gray-300 text-lg">
+          <li>• リクエストごとに独立</li>
+          <li>• サーバー側で状態を保持しない</li>
+          <li>• 前のやり取りは「渡さない限り」知らない</li>
+        </ul>
+      </div>
+      <div class="bg-slate-800/50 p-6 rounded-xl">
+        <h3 class="text-xl font-bold text-blue-200 mb-4">つまり…</h3>
+        <ul class="space-y-3 text-gray-300 text-lg">
+          <li>• <span class="text-yellow-300">学習もされない</span></li>
+          <li>• 覚えさせることもできない</li>
+          <li>• 毎回「初対面」として処理される</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 6: Demo OpenAI -->
+<div class="slide" data-slide="5">
+  <div class="flex-1 p-8">
+    <h2 class="text-3xl font-bold mb-6 text-blue-100">【デモ】OpenAI APIでステートレスを体験</h2>
+    <div class="grid grid-cols-2 gap-6">
+      <div>
+        <h3 class="text-xl font-bold text-green-300 mb-3">1回目のリクエスト</h3>
+        <div class="bg-slate-900 p-5 rounded-lg font-mono text-sm">
+          <div class="text-gray-400 mb-2"># 名前を伝える</div>
+          <pre class="text-green-300">response = client.chat.completions.create(
+  model="gpt-4o-mini",
+  messages=[{
+    "role": "user",
+    "content": "私の名前は良です。覚えておいてね"
+  }]
+)</pre>
+          <div class="mt-4 bg-slate-800 p-3 rounded text-blue-200">
+            → 「はい、良さんですね！覚えました」
+          </div>
+        </div>
+      </div>
+      <div>
+        <h3 class="text-xl font-bold text-red-300 mb-3">2回目のリクエスト（別リクエスト）</h3>
+        <div class="bg-slate-900 p-5 rounded-lg font-mono text-sm">
+          <div class="text-gray-400 mb-2"># 名前を聞く</div>
+          <pre class="text-green-300">response = client.chat.completions.create(
+  model="gpt-4o-mini",
+  messages=[{
+    "role": "user", 
+    "content": "私の名前は？"
+  }]
+)</pre>
+          <div class="mt-4 bg-slate-800 p-3 rounded text-red-200">
+            → 「申し訳ありませんが、お名前を教えていただいていません」
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 bg-yellow-900/30 border border-yellow-500/50 p-5 rounded-xl text-center">
+      <span class="text-yellow-300 text-2xl">💡</span>
+      <span class="text-xl ml-2">「覚えました」と言っても、次のリクエストでは<span class="text-red-300 font-bold">完全に忘れている</span></span>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 7: Why Remember -->
+<div class="slide" data-slide="6">
+  <div class="flex-1 p-10">
+    <h2 class="text-4xl font-bold mb-8 text-blue-100">なぜ「覚えている」ように見えるのか？</h2>
+    <div class="bg-gradient-to-r from-blue-900/50 to-purple-900/50 p-8 rounded-xl mb-8 max-w-4xl mx-auto">
+      <div class="text-center text-2xl">
+        <span class="text-blue-200">アプリ側が</span>
+        <span class="text-yellow-300 font-bold mx-2">過去の会話を全部まとめて</span>
+        <span class="text-blue-200">LLMに渡しているから</span>
+      </div>
+    </div>
+    <div class="bg-slate-900 p-5 rounded-lg font-mono text-sm mb-6 max-w-3xl mx-auto">
+      <div class="text-gray-400 mb-2"># ChatGPTアプリが裏でやっていること</div>
+      <pre class="text-green-300">messages = [
+  {"role": "user", "content": "私の名前は良です"},
+  {"role": "assistant", "content": "良さんですね！覚えました"},
+  {"role": "user", "content": "私の名前は？"}  # ← 新しい質問
+]
+# ↑ 毎回、過去の履歴を全部含めて送っている</pre>
+    </div>
+    <div class="flex items-center justify-center gap-6">
+      <div class="bg-slate-800 p-5 rounded-lg text-center">
+        <div class="text-4xl mb-2">🧠</div>
+        <div class="text-gray-300">LLM本体</div>
+        <div class="text-sm text-gray-500">（記憶喪失の天才）</div>
+      </div>
+      <div class="text-4xl">+</div>
+      <div class="bg-slate-800 p-5 rounded-lg text-center">
+        <div class="text-4xl mb-2">📝</div>
+        <div class="text-gray-300">アプリ側のメモ</div>
+        <div class="text-sm text-gray-500">（会話履歴を保持）</div>
+      </div>
+      <div class="text-4xl">=</div>
+      <div class="bg-green-900/50 p-5 rounded-lg text-center border border-green-500/50">
+        <div class="text-4xl mb-2">✨</div>
+        <div class="text-green-200">賢いAI体験</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 8: Strategies -->
+<div class="slide" data-slide="7">
+  <div class="flex-1 p-10">
+    <h2 class="text-4xl font-bold mb-8 text-blue-100">アプリはどうやって「必要な情報」を選んでいる？</h2>
+    <div class="grid grid-cols-2 gap-6 max-w-5xl mx-auto">
+      <div class="bg-slate-800/50 p-6 rounded-xl border-l-4 border-blue-400">
+        <h3 class="font-bold text-blue-200 text-xl mb-3">1. 直近の履歴だけ渡す</h3>
+        <p class="text-gray-300 mb-2">最新10〜20ターンだけを保持</p>
+        <p class="text-gray-500 text-sm">シンプルで高速、でも古い情報は消える</p>
+      </div>
+      <div class="bg-slate-800/50 p-6 rounded-xl border-l-4 border-pink-400">
+        <h3 class="font-bold text-pink-200 text-xl mb-3">2. 要約して渡す</h3>
+        <p class="text-gray-300 mb-2">古い会話をLLMで要約して保存</p>
+        <p class="text-gray-500 text-sm">トークン節約しつつ文脈を維持</p>
+      </div>
+      <div class="bg-slate-800/50 p-6 rounded-xl border-l-4 border-green-400">
+        <h3 class="font-bold text-green-200 text-xl mb-3">3. ベクトル検索（RAG）</h3>
+        <p class="text-gray-300 mb-2">今の質問に「意味的に近い」過去情報だけ検索</p>
+        <p class="text-gray-500 text-sm">ChatGPTのメモリ機能の原理</p>
+      </div>
+      <div class="bg-slate-800/50 p-6 rounded-xl border-l-4 border-yellow-400">
+        <h3 class="font-bold text-yellow-200 text-xl mb-3">4. システムプロンプトに固定</h3>
+        <p class="text-gray-300 mb-2">常に必要な情報は固定で渡す</p>
+        <p class="text-gray-500 text-sm">ユーザー設定、ルールなど</p>
+      </div>
+    </div>
+    <div class="mt-8 bg-slate-700/50 p-5 rounded-xl max-w-3xl mx-auto">
+      <p class="text-center text-gray-300 text-xl">
+        実際のAIアプリは、これらを<span class="text-yellow-300 font-bold">組み合わせて</span>使っている
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 9: LangChain -->
+<div class="slide" data-slide="8">
+  <div class="flex-1 p-10">
+    <h2 class="text-4xl font-bold mb-8 text-blue-100">LangChain とは</h2>
+    <div class="bg-gradient-to-r from-emerald-900/50 to-teal-900/50 p-8 rounded-xl mb-8 max-w-4xl mx-auto">
+      <p class="text-2xl text-center text-emerald-100">
+        LLMをアプリに組み込むための<span class="font-bold text-yellow-300">フレームワーク</span>
+      </p>
+      <p class="text-center text-gray-300 mt-3 text-xl">
+        LLMとアプリの間の<span class="text-emerald-300">ミドルウェア</span>的な役割
+      </p>
+    </div>
+    <div class="grid grid-cols-3 gap-6 mb-6 max-w-4xl mx-auto">
+      <div class="bg-slate-800/50 p-6 rounded-xl text-center">
+        <div class="text-4xl mb-3">💾</div>
+        <h4 class="font-bold text-blue-200 text-xl">Memory</h4>
+        <p class="text-sm text-gray-400 mt-2">会話履歴の管理<br>要約・検索・保持</p>
+      </div>
+      <div class="bg-slate-800/50 p-6 rounded-xl text-center">
+        <div class="text-4xl mb-3">🔍</div>
+        <h4 class="font-bold text-blue-200 text-xl">Retrieval</h4>
+        <p class="text-sm text-gray-400 mt-2">外部データの検索<br>RAG構築</p>
+      </div>
+      <div class="bg-slate-800/50 p-6 rounded-xl text-center">
+        <div class="text-4xl mb-3">🛠️</div>
+        <h4 class="font-bold text-blue-200 text-xl">Tools</h4>
+        <p class="text-sm text-gray-400 mt-2">外部ツール実行<br>API・DB連携</p>
+      </div>
+    </div>
+    <div class="bg-slate-900 p-5 rounded-lg max-w-4xl mx-auto">
+      <p class="text-lg text-gray-300">
+        <span class="text-yellow-300">エンジニア向け：</span>
+        LLM単体ではできない「メモリ管理」「ツール実行」「外部データ参照」をライブラリとして提供
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 10: LangChain Demo -->
+<div class="slide" data-slide="9">
+  <div class="flex-1 p-8">
+    <h2 class="text-3xl font-bold mb-4 text-blue-100">【デモ】LangChainで外部メモリ検索</h2>
+    <p class="text-gray-300 mb-4 text-lg">過去のメモから「今の質問に関連するもの」だけを検索して渡す</p>
+    <div class="bg-slate-900 p-5 rounded-lg font-mono text-sm max-w-4xl">
+      <pre class="text-green-300">from langchain_openai import OpenAIEmbeddings
+from langchain_chroma import Chroma
+
+# 過去のメモ（外部メモリ）を保存
+texts = [
+    "ユーザーはKafkaを勉強している",
+    "最近はDebeziumのCDCに関心がある", 
+    "DockerをWSL2で使っている"
+]
+db = Chroma.from_texts(texts, OpenAIEmbeddings())
+
+# 今の質問に関連するメモだけを検索
+query = "WSL2でDockerを最適化する方法を教えて？"
+results = db.similarity_search(query, k=2)
+
+# → "DockerをWSL2で使っている" が検索される
+# → この情報だけをLLMに渡す</pre>
+    </div>
+    <div class="mt-6 bg-blue-900/30 border border-blue-500/50 p-5 rounded-xl max-w-4xl">
+      <p class="text-center text-xl">
+        <span class="text-blue-300">💡 ポイント：</span>
+        全部の履歴を渡すのではなく、<span class="text-yellow-300 font-bold">必要なものだけ検索して渡す</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 11: Summary -->
+<div class="slide" data-slide="10">
+  <div class="flex-1 p-10">
+    <h2 class="text-4xl font-bold mb-8 text-blue-100">まとめ</h2>
+    <div class="space-y-5 max-w-4xl mx-auto">
+      <div class="bg-slate-800/50 p-6 rounded-xl flex items-start gap-5">
+        <div class="text-4xl">1️⃣</div>
+        <div>
+          <p class="text-2xl text-blue-200 font-bold">LLM本体は学習・記憶をしない</p>
+          <p class="text-gray-400 text-lg">APIはステートレス。毎回「初対面」として処理される</p>
+        </div>
+      </div>
+      <div class="bg-slate-800/50 p-6 rounded-xl flex items-start gap-5">
+        <div class="text-4xl">2️⃣</div>
+        <div>
+          <p class="text-2xl text-blue-200 font-bold">「賢く見える」のはアプリ側の工夫</p>
+          <p class="text-gray-400 text-lg">外部メモリ + 情報抽出アルゴリズム + プロンプト設計</p>
+        </div>
+      </div>
+      <div class="bg-slate-800/50 p-6 rounded-xl flex items-start gap-5">
+        <div class="text-4xl">3️⃣</div>
+        <div>
+          <p class="text-2xl text-blue-200 font-bold">普段使っているのは「AIアプリ」</p>
+          <p class="text-gray-400 text-lg">LLM + アプリの工夫 = 便利なAI体験</p>
+        </div>
+      </div>
+    </div>
+    <div class="mt-8 bg-gradient-to-r from-yellow-900/50 to-orange-900/50 p-6 rounded-xl border border-yellow-500/30 max-w-3xl mx-auto">
+      <p class="text-center text-2xl">
+        <span class="text-yellow-300">🎯</span> 仕組みを理解して使うと、AIはもっと活用できる
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 12: Message -->
+<div class="slide" data-slide="11">
+  <div class="flex-1 p-10 flex flex-col justify-center">
+    <h2 class="text-4xl font-bold mb-10 text-center text-blue-100">お伝えしたかったこと</h2>
+    <div class="max-w-3xl mx-auto space-y-8">
+      <div class="bg-gradient-to-r from-purple-900/50 to-blue-900/50 p-8 rounded-xl">
+        <p class="text-2xl text-center leading-relaxed">
+          「AI本体」に何かを覚えさせる・学習させる<br>
+          ということは<span class="text-yellow-300 font-bold">（基本的に）できない</span>
+        </p>
+      </div>
+      <div class="bg-gradient-to-r from-blue-900/50 to-cyan-900/50 p-8 rounded-xl">
+        <p class="text-2xl text-center leading-relaxed">
+          大事なのは<br>
+          <span class="text-cyan-300 font-bold">「どうコンテキストを渡すか」</span><br>
+          <span class="text-cyan-300 font-bold">「どう情報を整理するか」</span>
+        </p>
+      </div>
+      <div class="text-center text-gray-400 mt-8 text-xl">
+        <p>エンジニアとして裏側を知ると、</p>
+        <p>AIの使い方も、AIアプリの作り方も変わってきます</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 13: End -->
+<div class="slide" data-slide="12">
+  <div class="flex-1 flex flex-col items-center justify-center text-center p-10">
+    <div class="text-7xl mb-8">🙏</div>
+    <h2 class="text-5xl font-bold mb-6 text-blue-100">ありがとうございました</h2>
+    <p class="text-2xl text-gray-300 mb-10">質問・ディスカッション歓迎です！</p>
+    <div class="bg-slate-800/50 p-8 rounded-xl">
+      <p class="text-gray-400 text-lg">
+        今日のキーワード<br><br>
+        <span class="text-blue-300 text-xl">ステートレス</span> / 
+        <span class="text-pink-300 text-xl">外部メモリ</span> / 
+        <span class="text-green-300 text-xl">コンテキスト</span> / 
+        <span class="text-yellow-300 text-xl">LangChain</span>
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Navigation -->
+<div class="fixed bottom-0 left-0 right-0 h-16 bg-slate-900/90 border-t border-slate-700 flex items-center justify-between px-8">
+  <div class="flex items-center gap-3">
+    <a href="index.html" class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition text-sm text-gray-400 hover:text-white">
+      🏠 メニュー
+    </a>
+    <button onclick="prevSlide()" class="flex items-center gap-2 px-5 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition text-lg" id="prevBtn">
+      ← 前へ
+    </button>
+  </div>
+  <div class="flex items-center gap-3" id="dots"></div>
+  <div class="flex items-center gap-6">
+    <span class="text-gray-400" id="counter">1 / 13</span>
+    <button onclick="nextSlide()" class="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition text-lg" id="nextBtn">
+      次へ →
+    </button>
+  </div>
+</div>
+
+<script>
+  let current = 0;
+  const slides = document.querySelectorAll('.slide');
+  const total = slides.length;
+  const dotsContainer = document.getElementById('dots');
+  const counter = document.getElementById('counter');
+  const prevBtn = document.getElementById('prevBtn');
+  const nextBtn = document.getElementById('nextBtn');
+
+  // Create dots
+  for (let i = 0; i < total; i++) {
+    const dot = document.createElement('button');
+    dot.className = 'w-3 h-3 rounded-full transition';
+    dot.onclick = () => goToSlide(i);
+    dotsContainer.appendChild(dot);
+  }
+
+  function updateSlide() {
+    slides.forEach((slide, i) => {
+      slide.classList.toggle('active', i === current);
+    });
+    const dots = dotsContainer.querySelectorAll('button');
+    dots.forEach((dot, i) => {
+      dot.className = i === current 
+        ? 'w-3 h-3 rounded-full bg-blue-400' 
+        : 'w-2 h-2 rounded-full bg-slate-600';
+    });
+    counter.textContent = `${current + 1} / ${total}`;
+    prevBtn.style.opacity = current === 0 ? '0.3' : '1';
+    nextBtn.style.opacity = current === total - 1 ? '0.3' : '1';
+  }
+
+  function prevSlide() {
+    if (current > 0) { current--; updateSlide(); }
+  }
+
+  function nextSlide() {
+    if (current < total - 1) { current++; updateSlide(); }
+  }
+
+  function goToSlide(i) {
+    current = i;
+    updateSlide();
+  }
+
+  // Keyboard navigation
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowRight' || e.key === ' ') nextSlide();
+    if (e.key === 'ArrowLeft') prevSlide();
+  });
+
+  // Initialize
+  updateSlide();
+</script>
+
+</body>
+</html>

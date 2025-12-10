@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIトーク会 資料</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body { font-family: 'Segoe UI', 'Hiragino Kaku Gothic ProN', sans-serif; }
+    .card {
+      transition: all 0.3s ease;
+    }
+    .card:hover {
+      transform: translateY(-4px);
+      box-shadow: 0 20px 40px rgba(0, 0, 0, 0.3);
+    }
+  </style>
+</head>
+<body class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 text-white">
+
+  <div class="container mx-auto px-6 py-12 max-w-4xl">
+    
+    <!-- Header -->
+    <div class="text-center mb-12">
+      <div class="text-6xl mb-4">🤖</div>
+      <h1 class="text-4xl font-bold text-blue-100 mb-3">AIトーク会</h1>
+      <p class="text-xl text-gray-400">部内勉強会・情報共有の資料集</p>
+    </div>
+
+    <!-- Content List -->
+    <div class="space-y-6">
+      
+      <!-- Card 1: AI App Backend -->
+      <a href="aiappbackend.html" class="card block bg-slate-800/50 border border-slate-700 rounded-xl p-6 hover:border-blue-500/50">
+        <div class="flex items-start gap-5">
+          <div class="bg-blue-600/20 p-4 rounded-xl">
+            <span class="text-4xl">🧠</span>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center gap-3 mb-2">
+              <h2 class="text-2xl font-bold text-blue-100">AIアプリの「裏側」を知ろう</h2>
+              <span class="bg-green-600/30 text-green-300 text-xs px-2 py-1 rounded-full">NEW</span>
+            </div>
+            <p class="text-gray-400 mb-3">LLMは学習しない、でも賢く見える理由</p>
+            <div class="flex flex-wrap gap-2">
+              <span class="bg-slate-700 px-3 py-1 rounded-full text-sm text-gray-300">ステートレス</span>
+              <span class="bg-slate-700 px-3 py-1 rounded-full text-sm text-gray-300">外部メモリ</span>
+              <span class="bg-slate-700 px-3 py-1 rounded-full text-sm text-gray-300">LangChain</span>
+              <span class="bg-slate-700 px-3 py-1 rounded-full text-sm text-gray-300">OpenAI API</span>
+            </div>
+          </div>
+          <div class="text-gray-500 text-3xl">→</div>
+        </div>
+      </a>
+
+      <!-- Placeholder for future content -->
+      <div class="bg-slate-800/20 border border-slate-700/50 border-dashed rounded-xl p-6 opacity-50">
+        <div class="flex items-start gap-5">
+          <div class="bg-slate-700/30 p-4 rounded-xl">
+            <span class="text-4xl">📝</span>
+          </div>
+          <div class="flex-1">
+            <h2 class="text-xl font-bold text-gray-500">次回のトピック（準備中）</h2>
+            <p class="text-gray-600 mt-1">Coming soon...</p>
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer -->
+    <div class="mt-16 text-center text-gray-500 text-sm">
+      <p>部内AIトーク会 資料置き場</p>
+      <p class="mt-1">キーボード操作: スライド内で ←→ または スペースキー で移動</p>
+    </div>
+
+  </div>
+
+</body>
+</html>
