@@ -181,11 +181,14 @@
       <div class="bg-slate-800/50 p-6 rounded-xl">
         <h3 class="text-xl font-bold text-blue-200 mb-4">つまり…</h3>
         <ul class="space-y-3 text-gray-300 text-lg">
-          <li>• <span class="text-yellow-300">学習もされない</span></li>
-          <li>• 覚えさせることもできない</li>
+          <li>• <span class="text-yellow-300">その場で学習されることはない</span></li>
+          <li>• 会話中に覚えさせることもできない</li>
           <li>• 毎回「初対面」として処理される</li>
         </ul>
       </div>
+    </div>
+    <div class="mt-6 text-center text-gray-500 text-sm">
+      ※ ファインチューニング等の仕組みについては Appendix 参照
     </div>
   </div>
 </div>
@@ -389,7 +392,7 @@ results = db.similarity_search(query, k=2)
       <div class="bg-slate-800/50 p-6 rounded-xl flex items-start gap-5">
         <div class="text-4xl">1️⃣</div>
         <div>
-          <p class="text-2xl text-blue-200 font-bold">LLM本体は学習・記憶をしない</p>
+          <p class="text-2xl text-blue-200 font-bold">LLM本体は<span class="text-yellow-300">使っている間に</span>学習・記憶をしない</p>
           <p class="text-gray-400 text-lg">APIはステートレス。毎回「初対面」として処理される</p>
         </div>
       </div>
@@ -423,8 +426,8 @@ results = db.similarity_search(query, k=2)
     <div class="max-w-3xl mx-auto space-y-8">
       <div class="bg-gradient-to-r from-purple-900/50 to-blue-900/50 p-8 rounded-xl">
         <p class="text-2xl text-center leading-relaxed">
-          「AI本体」に何かを覚えさせる・学習させる<br>
-          ということは<span class="text-yellow-300 font-bold">（基本的に）できない</span>
+          <span class="text-yellow-300 font-bold">普段の利用で</span>AI本体に何かを覚えさせる・学習させる<br>
+          ということは<span class="text-yellow-300 font-bold">できない</span>
         </p>
       </div>
       <div class="bg-gradient-to-r from-blue-900/50 to-cyan-900/50 p-8 rounded-xl">
@@ -457,13 +460,153 @@ results = db.similarity_search(query, k=2)
         <span class="text-yellow-300 text-xl">LangChain</span>
       </p>
     </div>
+    <div class="mt-8 text-gray-500">
+      → 続きは Appendix へ
+    </div>
+  </div>
+</div>
+
+<!-- Slide 14: Appendix Title -->
+<div class="slide" data-slide="13">
+  <div class="flex-1 flex flex-col items-center justify-center text-center p-10">
+    <div class="text-6xl mb-6">📚</div>
+    <h2 class="text-5xl font-bold mb-4 text-blue-100">Appendix</h2>
+    <p class="text-2xl text-gray-300">補足情報・詳細解説</p>
+  </div>
+</div>
+
+<!-- Slide 15: Appendix - Fine-tuning -->
+<div class="slide" data-slide="14">
+  <div class="flex-1 p-10">
+    <h2 class="text-3xl font-bold mb-6 text-blue-100">📚 Appendix: LLMの「学習」について正確に理解する</h2>
+    <div class="grid grid-cols-2 gap-6 max-w-5xl mx-auto">
+      <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-600">
+        <h3 class="text-xl font-bold text-red-300 mb-4">❌ 普段の利用でできないこと</h3>
+        <ul class="space-y-3 text-gray-300">
+          <li>• チャット中にモデルのパラメータを更新する</li>
+          <li>• 「これ覚えて」でモデル自体に記憶させる</li>
+          <li>• 会話を通じてモデルを賢くする</li>
+        </ul>
+        <div class="mt-4 bg-red-900/20 p-3 rounded-lg text-sm text-gray-400">
+          → 今日話した「ステートレス」はここの話
+        </div>
+      </div>
+      <div class="bg-slate-800/50 p-6 rounded-xl border border-slate-600">
+        <h3 class="text-xl font-bold text-green-300 mb-4">✅ 技術的に可能なこと</h3>
+        <ul class="space-y-3 text-gray-300">
+          <li>• <span class="text-yellow-300">ファインチューニング</span>：自社データで追加学習</li>
+          <li>• <span class="text-yellow-300">RAG</span>：外部知識を検索して渡す</li>
+          <li>• <span class="text-yellow-300">プロンプト設計</span>：指示を工夫する</li>
+        </ul>
+        <div class="mt-4 bg-green-900/20 p-3 rounded-lg text-sm text-gray-400">
+          → ただし専門知識・コスト・時間が必要
+        </div>
+      </div>
+    </div>
+    <div class="mt-6 bg-blue-900/30 border border-blue-500/30 p-5 rounded-xl max-w-5xl mx-auto">
+      <h4 class="font-bold text-blue-200 mb-3">🔧 ファインチューニングとは？</h4>
+      <p class="text-gray-300">
+        既存のLLMに対して、特定のデータセットで<span class="text-yellow-300">追加の学習</span>を行い、特定タスクに特化させる手法。
+        OpenAI APIでは企業向けに提供されている。ただし、数十〜数百の学習データが必要で、コストと時間がかかる。
+      </p>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 16: Appendix - Training Data -->
+<div class="slide" data-slide="15">
+  <div class="flex-1 p-10">
+    <h2 class="text-3xl font-bold mb-6 text-blue-100">📚 Appendix: 会話データは将来の学習に使われる？</h2>
+    <div class="max-w-4xl mx-auto">
+      <div class="bg-yellow-900/30 border border-yellow-500/30 p-6 rounded-xl mb-6">
+        <h3 class="text-xl font-bold text-yellow-200 mb-3">⚠️ サービスによって異なる</h3>
+        <p class="text-gray-300">
+          ChatGPT（Web版）などでは、設定によっては会話データが<span class="text-yellow-300">将来のモデル改善</span>に使われる可能性があります。
+          ただし、これは<span class="text-yellow-300">リアルタイムの学習ではなく</span>、後日まとめて行われる訓練プロセスです。
+        </p>
+      </div>
+      <div class="grid grid-cols-2 gap-6 mb-6">
+        <div class="bg-slate-800/50 p-5 rounded-xl">
+          <h4 class="font-bold text-blue-200 mb-3">ChatGPT（Web版）</h4>
+          <ul class="space-y-2 text-gray-300 text-sm">
+            <li>• デフォルト: 学習に使用される場合あり</li>
+            <li>• 設定でオプトアウト可能</li>
+            <li>• 「Chat History & Training」で変更</li>
+          </ul>
+        </div>
+        <div class="bg-slate-800/50 p-5 rounded-xl">
+          <h4 class="font-bold text-blue-200 mb-3">API利用（企業向け）</h4>
+          <ul class="space-y-2 text-gray-300 text-sm">
+            <li>• デフォルト: 学習に使用<span class="text-green-300">されない</span></li>
+            <li>• 明示的に許可した場合のみ使用</li>
+            <li>• 企業利用では安心</li>
+          </ul>
+        </div>
+      </div>
+      <div class="bg-slate-800/50 p-5 rounded-xl">
+        <h4 class="font-bold text-blue-200 mb-3">📌 今日の話との関係</h4>
+        <p class="text-gray-300">
+          今日話した「APIはステートレス」「その場で学習しない」は100%正確です。<br>
+          上記の「将来の学習」は、その場ではなく、後日OpenAI等が行う<span class="text-yellow-300">別プロセスでの訓練</span>の話です。
+          混同しなう。
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Slide 17: Appendix - Comparison Table -->
+<div class="slide" data-slide="16">
+  <div class="flex-1 p-10">
+    <h2 class="text-3xl font-bold mb-6 text-blue-100">📚 Appendix: 「学習」の種類を整理</h2>
+    <div class="max-w-5xl mx-auto">
+      <table class="w-full text-left border-collapse">
+        <thead>
+          <tr class="border-b border-slate-600">
+            <th class="p-4 text-blue-200">種類</th>
+            <th class="p-200">タイミング</th>
+            <th class="p-4 text-blue-200">誰が行う</th>
+            <th class="p-4 text-blue-200">一般ユーザーが可能？</th>
+          </tr>
+        </thead>
+        <tbody class="text-gray-300">
+          <tr class="border-b border-slate-700 bg-slate-800/30">
+            <td class="p-4 font-bold text-yellow-300">事前学習<br><span class="text-sm text-gray-500">Pre-training</span></td>
+            <td class="p-4">モデル開発時<br>（数週間〜数ヶ月）</td  <td class="p-4">OpenAI, Anthropic等</td>
+            <td class="p-4 text-red-400">❌ 不可</td>
+          </tr>
+          <tr class="border-b border-slate-700">
+            <td class="p-4 font-bold text-yellow-300">ファインチューニング<br><span class="text-sm text-gray-500">Fine-tuning</span></td>
+            <td class="p-4">事前に実施<br>（数時間〜数日）</td>
+            <td class="p-4">企業・開発者</td>
+            <td class="p-4 text-yellow-400">△ API契約が必要</t/tr>
+          <tr class="border-b border-slate-700 bg-slate-800/30">
+            <td class="p-4 font-bold text-yellow-300">RAG / 外部メモリ<br><span class="text-sm text-gray-500">Retrieval</span></td>
+            <td class="p-4">リアルタイム</td>
+            <td class="p-4">アプリ側</td>
+            <td class="p-4 text-green-400">✅ 間接的に利用中</td>
+          </tr>
+          <tr class="border-b border-slate-700">
+            <td class="p-4 font-bold text-yellow-300">プロンプãpan class="text-sm text-gray-500">Prompt Engineering</span></td>
+            <td class="p-4">リアルタイム</td>
+            <td class="p-4">ユーザー</td>
+            <td class="p-4 text-green-400">✅ 誰でも可能</td>
+          </tr>
+        </tbody>
+      </table>
+      <div class="mt-6 bg-green-900/30 border border-green-500/30 p-5 rounded-xl">
+        <p class="text-center text-lg">
+          <span class="text-green-300">💡</span> 一般ユーザーがコントロールできるのは<spas="text-yellow-300 font-bold">「プロンプト設計」</span>と<span class="text-yellow-300 font-bold">「コンテキストの与え方」</span>
+        </p>
+      </div>
+    </div>
   </div>
 </div>
 
 <!-- Navigation -->
 <div class="fixed bottom-0 left-0 right-0 h-16 bg-slate-900/90 border-t border-slate-700 flex items-center justify-between px-8">
   <div class="flex items-center gap-3">
-    <a href="index.html" class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition text-sm text-gray-400 hover:text-white">
+    <a href="index.html" class="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transitiext-gray-400 hover:text-white">
       🏠 メニュー
     </a>
     <button onclick="prevSlide()" class="flex items-center gap-2 px-5 py-2 bg-slate-700 hover:bg-slate-600 rounded-lg transition text-lg" id="prevBtn">
@@ -472,7 +615,7 @@ results = db.similarity_search(query, k=2)
   </div>
   <div class="flex items-center gap-3" id="dots"></div>
   <div class="flex items-center gap-6">
-    <span class="text-gray-400" id="counter">1 / 13</span>
+    <span class="text-gray-400" id="counter">1 / 17</span>
     <button onclick="nextSlide()" class="flex items-center gap-2 px-5 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition text-lg" id="nextBtn">
       次へ →
     </button>
@@ -490,7 +633,7 @@ results = db.similarity_search(query, k=2)
 
   // Create dots
   for (let i = 0; i < total; i++) {
-    const dot = document.createElement('button');
+    const dot = document.crement('button');
     dot.className = 'w-3 h-3 rounded-full transition';
     dot.onclick = () => goToSlide(i);
     dotsContainer.appendChild(dot);
